@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 0 * * *'  # Executar diariamente às 00:00 UTC
+    - cron: '0 0 * * *'
 
 jobs:
   build:
@@ -25,3 +25,11 @@ jobs:
 
     - name: Run Puppeteer
       run: node index.js
+
+    - name: Commit data
+      uses: EndBug/add-and-commit@v9
+      with:
+        author_name: github-actions
+        author_email: github-actions@github.com
+        message: "Update processos data"
+        add: processos.json
