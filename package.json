@@ -1,0 +1,12 @@
+{
+  "name": "puppeteer-project",
+  "version": "1.0.0",
+  "description": "Project to scrape data with Puppeteer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  }
+}
