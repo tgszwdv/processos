@@ -1,0 +1,86 @@
+Para criar um script de scraping que coleta dados de uma página e os utiliza para preencher outra página em um domínio diferente, você pode usar uma abordagem de duas etapas:
+
+Coletar Dados da Página Fonte: Usar Puppeteer para acessar e extrair dados da página de origem.
+Enviar Dados para a Página de Destino: Usar uma requisição HTTP para enviar os dados para a página de destino, onde eles podem ser processados e exibidos.
+Aqui está um exemplo de como você pode configurar isso:
+
+Parte 1: Coletar Dados da Página Fonte
+Vamos manter o script scrap.js para coletar dados da página https://selecao-login.app.ufgd.edu.br/. O script coleta dados e salva como JSON.
+
+javascript
+Copiar código
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+
+async function scrape() {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  
+  const url = 'https://selecao-login.app.ufgd.edu.br/';
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  const processos = await page.evaluate(() => {
+    const processos = [];
+    const rows = document.querySelectorAll('tr[ng-repeat="processo in ctrl.inscricoesAbertas track by $index"]');
+    
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      const titulo = cells[0].innerText.trim();
+      const descricao = cells[1].innerText.trim();
+      const periodo = cells[2].innerText.trim();
+      const editalUrl = cells[3].querySelector('a') ? cells[3].querySelector('a').href : '';
+      const paginaUrl = cells[4].querySelector('a') ? cells[4].querySelector('a').href : '';
+
+      processos.push({
+        titulo: titulo,
+        descricao: descricao,
+        periodo: periodo,
+        url: paginaUrl,
+        edital: editalUrl
+      });
+    });
+
+    return processos;
+  });
+
+  await browser.close();
+
+  // Salvar os dados em um arquivo JSON
+  fs.writeFileSync('processos.json', JSON.stringify(processos, null, 2));
+}
+
+scrape().catch(console.error);
+Parte 2: Enviar Dados para a Página de Destino
+Para enviar os dados para outra página, você pode usar uma requisição HTTP. Aqui está um exemplo usando axios para enviar dados para uma API. Você precisará instalar o axios (npm install axios).
+
+javascript
+Copiar código
+const axios = require('axios');
+const fs = require('fs');
+
+async function sendData() {
+  // Ler dados do arquivo JSON
+  const processos = JSON.parse(fs.readFileSync('processos.json', 'utf8'));
+
+  // URL da API ou endpoint que receberá os dados
+  const apiUrl = 'https://destino.exemplo.com/api/processos';
+
+  try {
+    const response = await axios.post(apiUrl, processos);
+    console.log('Dados enviados com sucesso:', response.data);
+  } catch (error) {
+    console.error('Erro ao enviar dados:', error);
+  }
+}
+
+sendData().catch(console.error);
+Nota Importante
+Segurança e CORS: Certifique-se de que a página de destino permite requisições CORS do domínio de onde os dados estão sendo enviados, ou configure a página de destino para aceitar essas requisições.
+Autenticação: Se a página de destino requer autenticação, você precisará incluir os detalhes de autenticação na requisição HTTP.
+Com esses scripts, você poderá coletar dados de uma página e enviá-los para outra. Certifique-se de ajustar as URLs e seletores conforme necessário para o seu caso específico.
+
+
+
+
+
+
