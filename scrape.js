@@ -1,40 +1,34 @@
-const fs = require('fs');
 const puppeteer = require('puppeteer');
 
 (async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto('https://selecao-login.app.ufgd.edu.br/');
+  
+  await page.goto('https://selecao.ufgd.edu.br/', { waitUntil: 'networkidle2' });
 
-  // Espera até que a tabela esteja carregada
-  await page.waitForSelector('fieldset.ng-scope');
-
-  // Extração dos dados da tabela
+  // Extraindo os dados
   const processos = await page.evaluate(() => {
-    const rows = document.querySelectorAll('fieldset.ng-scope tbody tr');
-    let data = [];
+    // Função para extrair o texto ou URL
+    const extractText = (element) => element ? element.innerText.trim() : '';
+    const extractHref = (element) => element ? element.href : '';
 
-    rows.forEach(row => {
-      const cols = row.querySelectorAll('td');
-      const processo = {
-        titulo: cols[0].innerText.trim(),
-        descricao: cols[1].innerText.trim(),
-        periodo: cols[2].innerText.trim(),
-        edital: cols[3].querySelector('a').href,
-        pagina: cols[4].querySelector('a').href
+    // Selecionando todas as linhas da tabela
+    const rows = Array.from(document.querySelectorAll('table tbody tr'));
+
+    // Mapeando as linhas para um array de objetos
+    return rows.map(row => {
+      const cells = row.querySelectorAll('td');
+      return {
+        titulo: extractText(cells[0]),
+        descricao: extractText(cells[1]),
+        periodo: extractText(cells[2]),
+        edital: extractHref(cells[3].querySelector('a')),
+        pagina: extractHref(cells[4].querySelector('a'))
       };
-      data.push(processo);
     });
-
-    console.log(data); // Adiciona este log para verificar os dados extraídos
-
-    return data;
   });
 
-  console.log('Processos:', processos); // Adiciona este log para verificar os dados extraídos
-
-  // Salva os dados no arquivo processos.json
-  fs.writeFileSync('processos.json', JSON.stringify(processos, null, 2));
+  console.log(JSON.stringify(processos, null, 2)); // Formata e imprime o JSON
 
   await browser.close();
 })();
