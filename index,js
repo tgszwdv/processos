@@ -1,0 +1,24 @@
+const puppeteer = require('puppeteer');
+
+(async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto('https://selecao-login.app.ufgd.edu.br/');
+  
+  const processos = await page.evaluate(() => {
+    const rows = Array.from(document.querySelectorAll('tr[ng-repeat="processo in ctrl.inscricoesAbertas track by $index"]'));
+    return rows.map(row => {
+      const cells = row.querySelectorAll('td');
+      return {
+        titulo: cells[0].innerText.trim(),
+        descricao: cells[1].innerText.trim(),
+        periodo: cells[2].innerText.trim(),
+        edital: cells[3].querySelector('a').href,
+        url: cells[4].querySelector('a').href,
+      };
+    });
+  });
+
+  console.log(JSON.stringify(processos, null, 2));
+  await browser.close();
+})();
