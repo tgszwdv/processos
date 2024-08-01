@@ -1,0 +1,9 @@
+token
+
+scrap.js
+actions
+githubworkflow
+
+permissoes actions
+
+variaveis secretas para o github workflow
