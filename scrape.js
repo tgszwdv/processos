@@ -10,7 +10,7 @@ async function scrape() {
 
   const processos = await page.evaluate(() => {
     const processos = [];
-const rows = document.querySelectorAll('tr[ng-repeat="processo in ctrl.inscricoesAbertas track by $index"]');
+    const rows = document.querySelectorAll('tr[ng-repeat="processo in ctrl.inscricoesAbertas track by $index"]');
 
 rows.forEach(row => {
     const cells = row.querySelectorAll('td');
@@ -20,14 +20,20 @@ rows.forEach(row => {
     const editalUrl = cells[3].querySelector('a').href;
     const paginaUrl = cells[4].querySelector('a').href;
 
-    processos.push({
-        titulo: titulo,
-        descricao: descricao,
-        periodo: periodo,
-        url: paginaUrl,
-        edital: editalUrl
-    });
+    // Filtrar processos seletivos cujo título começa com 'PSIE'
+    if (!titulo.startsWith('PSIE')) {
+        processos.push({
+            titulo: titulo,
+            descricao: descricao,
+            periodo: periodo,
+            url: paginaUrl,
+            edital: editalUrl
+        });
+    }
 });
+
+console.log(JSON.stringify(processos));
+
 
 console.log(JSON.stringify(processos));
 
