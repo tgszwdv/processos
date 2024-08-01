@@ -1,14 +1,89 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Processos Seletivos</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processos Seletivos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-  <h1>Processos Seletivos</h1>
-  <div id="processos-container"></div>
-  <script src="script.js"></script>
+    <div class="container">
+        <div id="centroselecao"></div>
+    </div>
+
+    <script>
+        async function fetchProcessos() {
+            const response = await fetch('processos.json');
+            const processos = await response.json();
+            return processos;
+        }
+
+        function ajustarParaMST(date) {
+            const offset = -4 * 60 * 60 * 1000; // GMT-4
+            return new Date(date.getTime() + offset);
+        }
+
+        function gerarTabela(processos) {
+            const tbodyAbertos = document.createElement('tbody');
+            const hoje = ajustarParaMST(new Date());
+
+            processos.forEach(processo => {
+                const [inicioStr, fimStr] = processo.periodo.split(' a ');
+                const [diaIni, mesIni, anoIni] = inicioStr.split('/');
+                const [diaFim, mesFim, anoFim] = fimStr.split('/');
+
+                // Ajusta o horário do início e fim
+                const inicio = ajustarParaMST(new Date(`${anoIni}-${mesIni}-${diaIni}T00:00:00`));
+                const fim = ajustarParaMST(new Date(`${anoFim}-${mesFim}-${diaFim}T23:59:59`));
+
+                if (hoje >= inicio && hoje <= fim) {
+                    const tr = document.createElement('tr');
+                    tr.dataset.url = processo.url;
+                    tr.innerHTML = `
+                        <td>${processo.titulo} - ${processo.descricao}</td>
+                        <td class="text-center">${processo.periodo}</td>
+                    `;
+                    tr.querySelector('td.text-center').style.whiteSpace = window.innerWidth > 767 ? 'nowrap' : 'normal';
+                    tbodyAbertos.appendChild(tr);
+                }
+            });
+
+            if (tbodyAbertos.children.length > 0) {
+                const table = document.createElement('table');
+                table.className = 'table table-sm table-bordered table-striped table-hover table-custom compact-table';
+                table.style.borderRadius = '10px';
+                table.style.overflow = 'hidden';
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th class="fw-bold">Processos Seletivos com Inscrições Abertas</th>
+                            <th class="fw-bold text-center">Período de Inscrição</th>
+                        </tr>
+                    </thead>
+                `;
+                table.appendChild(tbodyAbertos);
+
+                const divCentroSelecao = document.getElementById('centroselecao');
+                divCentroSelecao.insertAdjacentElement('afterend', table);
+            }
+        }
+
+        fetchProcessos().then(processos => {
+            gerarTabela(processos);
+        });
+
+        document.addEventListener('click', (event) => {
+            const target = event.target.closest('tr');
+            if (target && target.dataset.url) {
+                window.location.href = target.dataset.url;
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('td.text-center').forEach(td => {
+                td.style.whiteSpace = window.innerWidth > 767 ? 'nowrap' : 'normal';
+            });
+        });
+    </script>
 </body>
 </html>
