@@ -1,50 +1,60 @@
-const puppeteer = require('puppeteer');
 const fs = require('fs');
+const puppeteer = require('puppeteer');
 
 (async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto('https://selecao.ufgd.edu.br/');
 
-  // Captura "Processos Seletivos com Inscrições Abertas"
-  const abertos = await page.evaluate(() => {
-    const processosAbertos = [];
-    const rows = document.querySelectorAll('fieldset.ng-scope:nth-of-type(1) .table tbody tr');
-    
+  // Espera até que as tabelas estejam carregadas
+  await page.waitForSelector('#table-1 tbody');
+  await page.waitForSelector('#table-2 tbody');
+
+  // Extração dos dados das duas tabelas
+  const processosAbertos = await page.evaluate(() => {
+    const rows = document.querySelectorAll('#table-1 tbody tr');
+    let data = [];
+
     rows.forEach(row => {
-      processosAbertos.push({
-        titulo: row.children[0].innerText,
-        descricao: row.children[1].innerText.trim(),
-        periodo: row.children[2].innerText,
-        edital: row.children[3].querySelector('a') ? row.children[3].querySelector('a').href : '',
-        pagina: row.children[4].querySelector('a') ? row.children[4].querySelector('a').href : ''
-      });
+      const cols = row.querySelectorAll('td');
+      const processo = {
+        titulo: cols[0].innerText.trim(),
+        descricao: cols[1].innerText.trim(),
+        periodo: cols[2].innerText.trim(),
+        edital: cols[3].querySelector('a').href,
+        pagina: cols[4].querySelector('a').href
+      };
+      data.push(processo);
     });
 
-    return processosAbertos;
+    return data;
   });
 
-  // Captura "Processos Seletivos em Andamento"
-  const andamento = await page.evaluate(() => {
-    const processosAndamento = [];
-    const rows = document.querySelectorAll('fieldset.ng-scope:nth-of-type(2) .table tbody tr');
-    
+  const processosAndamento = await page.evaluate(() => {
+    const rows = document.querySelectorAll('#table-2 tbody tr');
+    let data = [];
+
     rows.forEach(row => {
-      processosAndamento.push({
-        titulo: row.children[0].innerText,
-        descricao: row.children[1].innerText.trim(),
-        periodo: row.children[2].innerText,
-        edital: row.children[3].querySelector('a') ? row.children[3].querySelector('a').href : '',
-        pagina: row.children[4].querySelector('a') ? row.children[4].querySelector('a').href : ''
-      });
+      const cols = row.querySelectorAll('td');
+      const processo = {
+        titulo: cols[0].innerText.trim(),
+        descricao: cols[1].innerText.trim(),
+        periodo: cols[2].innerText.trim(),
+        edital: cols[3].querySelector('a').href,
+        pagina: cols[4].querySelector('a').href
+      };
+      data.push(processo);
     });
 
-    return processosAndamento;
+    return data;
   });
 
-  await browser.close();
+  console.log('Processos Abertos:', processosAbertos);
+  console.log('Processos em Andamento:', processosAndamento);
 
   // Salva os dados em arquivos JSON separados
-  fs.writeFileSync('processos-abertos.json', JSON.stringify(abertos, null, 2));
-  fs.writeFileSync('processos-andamento.json', JSON.stringify(andamento, null, 2));
+  fs.writeFileSync('processos_abertos.json', JSON.stringify(processosAbertos, null, 2));
+  fs.writeFileSync('processos_andamento.json', JSON.stringify(processosAndamento, null, 2));
+
+  await browser.close();
 })();
