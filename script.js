@@ -1,34 +1,21 @@
-const axios = require('axios');
-const fs = require('fs');
-const cheerio = require('cheerio');
+const processos = [];
+const rows = document.querySelectorAll('tr[ng-repeat="processo in ctrl.inscricoesAbertas track by $index"]');
 
-async function scrapeData() {
-    try {
-        const { data } = await axios.get('https://selecao-login.app.ufgd.edu.br/');
-        const $ = cheerio.load(data);
+rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    const titulo = cells[0].innerText.trim();
+    const descricao = cells[1].innerText.trim();
+    const periodo = cells[2].innerText.trim();
+    const editalUrl = cells[3].querySelector('a').href;
+    const paginaUrl = cells[4].querySelector('a').href;
 
-        const processos = [];
-        $('tr[ng-repeat="processo in ctrl.inscricoesAbertas track by $index"]').each((i, row) => {
-            const cells = $(row).find('td');
-            const titulo = $(cells[0]).text().trim();
-            const descricao = $(cells[1]).text().trim();
-            const periodo = $(cells[2]).text().trim();
-            const editalUrl = $(cells[3]).find('a').attr('href');
-            const paginaUrl = $(cells[4]).find('a').attr('href');
+    processos.push({
+        titulo: titulo,
+        descricao: descricao,
+        periodo: periodo,
+        url: paginaUrl,
+        edital: editalUrl
+    });
+});
 
-            processos.push({
-                titulo: titulo,
-                descricao: descricao,
-                periodo: periodo,
-                url: paginaUrl,
-                edital: editalUrl
-            });
-        });
-
-        fs.writeFileSync('data/processos.json', JSON.stringify(processos, null, 2));
-    } catch (error) {
-        console.error('Erro ao fazer scraping:', error);
-    }
-}
-
-scrapeData();
+console.log(processos);  // Imprime o array de processos no console
