@@ -1,34 +1,50 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 (async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  
-  await page.goto('https://selecao.ufgd.edu.br/', { waitUntil: 'networkidle2' });
+  await page.goto('https://selecao.ufgd.edu.br/');
 
-  // Extraindo os dados
-  const processos = await page.evaluate(() => {
-    // Função para extrair o texto ou URL
-    const extractText = (element) => element ? element.innerText.trim() : '';
-    const extractHref = (element) => element ? element.href : '';
-
-    // Selecionando todas as linhas da tabela
-    const rows = Array.from(document.querySelectorAll('table tbody tr'));
-
-    // Mapeando as linhas para um array de objetos
-    return rows.map(row => {
-      const cells = row.querySelectorAll('td');
-      return {
-        titulo: extractText(cells[0]),
-        descricao: extractText(cells[1]),
-        periodo: extractText(cells[2]),
-        edital: extractHref(cells[3].querySelector('a')),
-        pagina: extractHref(cells[4].querySelector('a'))
-      };
+  // Captura "Processos Seletivos com Inscrições Abertas"
+  const abertos = await page.evaluate(() => {
+    const processosAbertos = [];
+    const rows = document.querySelectorAll('fieldset.ng-scope:nth-of-type(1) .table tbody tr');
+    
+    rows.forEach(row => {
+      processosAbertos.push({
+        titulo: row.children[0].innerText,
+        descricao: row.children[1].innerText.trim(),
+        periodo: row.children[2].innerText,
+        edital: row.children[3].querySelector('a') ? row.children[3].querySelector('a').href : '',
+        pagina: row.children[4].querySelector('a') ? row.children[4].querySelector('a').href : ''
+      });
     });
+
+    return processosAbertos;
   });
 
-  console.log(JSON.stringify(processos, null, 2)); // Formata e imprime o JSON
+  // Captura "Processos Seletivos em Andamento"
+  const andamento = await page.evaluate(() => {
+    const processosAndamento = [];
+    const rows = document.querySelectorAll('fieldset.ng-scope:nth-of-type(2) .table tbody tr');
+    
+    rows.forEach(row => {
+      processosAndamento.push({
+        titulo: row.children[0].innerText,
+        descricao: row.children[1].innerText.trim(),
+        periodo: row.children[2].innerText,
+        edital: row.children[3].querySelector('a') ? row.children[3].querySelector('a').href : '',
+        pagina: row.children[4].querySelector('a') ? row.children[4].querySelector('a').href : ''
+      });
+    });
+
+    return processosAndamento;
+  });
 
   await browser.close();
+
+  // Salva os dados em arquivos JSON separados
+  fs.writeFileSync('processos-abertos.json', JSON.stringify(abertos, null, 2));
+  fs.writeFileSync('processos-andamento.json', JSON.stringify(andamento, null, 2));
 })();
