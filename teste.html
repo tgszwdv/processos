@@ -15,8 +15,9 @@
         async function fetchProcessos() {
             try {
                 const response = await fetch('https://processosver.vercel.app/api/processosAbertos');
-                const processos = await response.json();
-                return processos;
+                const data = await response.json();
+                // Acessa o array de processos da chave `processos`
+                return data.processos;
             } catch (error) {
                 console.error("Erro ao buscar os dados:", error);
                 return [];
