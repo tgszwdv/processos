@@ -1,5 +1,26 @@
 [
   {
+    "titulo": "CDPT-2024/UFGD",
+    "descricao": "Concurso Docente de Provas e Títulos da UFGD 2024",
+    "periodo": "11/11/2024 a 16/12/2024",
+    "url": "https://portal.ufgd.edu.br/vestibular/docente-de-provas-e-titulos-cdpt/cdpt-2024",
+    "edital": "https://files.ufgd.edu.br/arquivos/arquivos/78/DOCENTE-DE-PROVAS-E-TITULOS-CDPT/CDPT%20-%202024/Edital_Abertura_CCS_n%C2%B0_14_CDPT_2024.pdf"
+  },
+  {
+    "titulo": "PSSPS-2025.1",
+    "descricao": "Processo Seletivo Simplificado para Professor Substituto (PSSPS-2025.1)",
+    "periodo": "11/11/2024 a 21/11/2024",
+    "url": "https://portal.ufgd.edu.br/vestibular/selecao-de-professor-substituto-pssps/pssps-2025-1",
+    "edital": "https://files.ufgd.edu.br/arquivos/arquivos/78/SELECAO-DE-PROFESSOR-SUBSTITUTO-PSSPS/PSSPS%20-%202025.1/Edital_de_Abertura_CCS_13_PSSPS-2025.1%20-%20Consolidado%20em%2008-11-2024.pdf"
+  },
+  {
+    "titulo": "CDPT-2024/UFGD - FAIND",
+    "descricao": "Concurso Docente de Provas e Títulos da UFGD 2024 FAIND",
+    "periodo": "11/11/2024 a 16/12/2024",
+    "url": "https://portal.ufgd.edu.br/vestibular/docente-de-provas-e-titulos-cdpt/cdpt-faind-2024",
+    "edital": "https://files.ufgd.edu.br/arquivos/arquivos/78/DOCENTE-DE-PROVAS-E-TITULOS-CDPT/CDPT%20-%20FAIND%20-%202024/Edital_Abertura_CCS_n%C2%B0_15_CDPT_2024_FAIND.pdf"
+  },
+  {
     "titulo": "PSPVO-2025.1/UFGD",
     "descricao": "Processo Seletivo para Preenchimento de Vagas Ociosas por Transferência Voluntária e para Portadores de Diploma da UFGD",
     "periodo": "06/11/2024 a 17/01/2025",
